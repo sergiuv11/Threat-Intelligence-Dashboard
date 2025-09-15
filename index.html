@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberSOC Pro - Advanced Threat Intelligence Platform</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <!-- Toast notifications container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Loading overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Analyzing threat intelligence...</p>
+        </div>
+    </div>
+
+    <!-- Main application container -->
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-shield-halved"></i>
+                    <span class="logo-text">CyberSOC Pro</span>
+                </div>
+                <button class="sidebar-toggle" id="sidebar-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="#dashboard" class="nav-link active" data-tab="dashboard">
+                            <i class="fas fa-chart-pie"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#ioc-extractor" class="nav-link" data-tab="ioc-extractor">
+                            <i class="fas fa-search"></i>
+                            <span>IOC Extractor</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#threat-intel" class="nav-link" data-tab="threat-intel">
+                            <i class="fas fa-brain"></i>
+                            <span>Threat Intel</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#attack-mapping" class="nav-link" data-tab="attack-mapping">
+                            <i class="fas fa-project-diagram"></i>
+                            <span>MITRE ATT&CK</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#detection-rules" class="nav-link" data-tab="detection-rules">
+                            <i class="fas fa-code"></i>
+                            <span>Detection Rules</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#osint-toolkit" class="nav-link" data-tab="osint-toolkit">
+                            <i class="fas fa-satellite-dish"></i>
+                            <span>OSINT Toolkit</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#threat-hunting" class="nav-link" data-tab="threat-hunting">
+                            <i class="fas fa-crosshairs"></i>
+                            <span>Threat Hunting</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#analytics" class="nav-link" data-tab="analytics">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Analytics</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#timeline" class="nav-link" data-tab="timeline">
+                            <i class="fas fa-clock"></i>
+                            <span>Timeline</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#campaigns" class="nav-link" data-tab="campaigns">
+                            <i class="fas fa-users-cog"></i>
+                            <span>Campaigns</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="threat-level-indicator">
+                    <div class="threat-level-header">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Threat Level</span>
+                    </div>
+                    <div class="threat-level-badge" id="threat-level">
+                        <span class="level-text">ELEVATED</span>
+                        <span class="level-score">7.2</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main content area -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="main-header">
+                <div class="header-left">
+                    <h1 class="page-title" id="page-title">Threat Intelligence Dashboard</h1>
+                    <div class="breadcrumb" id="breadcrumb">
+                        <span class="breadcrumb-item active">Dashboard</span>
+                    </div>
+                </div>
+                
+                <div class="header-right">
+                    <div class="header-controls">
+                        <button class="btn btn-icon" id="theme-toggle" title="Toggle theme">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                        <button class="btn btn-icon" id="notifications-toggle" title="Notifications">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge">3</span>
+                        </button>
+                        <button class="btn btn-icon" id="settings-toggle" title="Settings">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="sync-status" id="sync-status">
+                        <i class="fas fa-sync-alt spinning"></i>
+                        <span>Last sync: <time id="last-sync">Just now</time></span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Tab content area -->
+            <div class="tab-container">
+                <!-- Dashboard Tab -->
+                <div class="tab-content active" id="dashboard">
+                    <div class="dashboard-grid">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <h3>IOCs Processed</h3>
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <div class="stat-value" id="iocs-processed">0</div>
+                            <div class="stat-change positive">+12% today</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <h3>Threats Detected</h3>
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="stat-value" id="threats-detected">0</div>
+                            <div class="stat-change negative">+3 critical</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <h3>Intelligence Sources</h3>
+                                <i class="fas fa-satellite-dish"></i>
+                            </div>
+                            <div class="stat-value" id="intel-sources">8</div>
+                            <div class="stat-change neutral">All active</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <h3>Detection Rules</h3>
+                                <i class="fas fa-code"></i>
+                            </div>
+                            <div class="stat-value" id="detection-rules">247</div>
+                            <div class="stat-change positive">+5 today</div>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-widgets">
+                        <div class="widget threat-timeline">
+                            <div class="widget-header">
+                                <h3>Recent Threat Activity</h3>
+                                <div class="widget-controls">
+                                    <button class="btn btn-small">View All</button>
+                                </div>
+                            </div>
+                            <div class="widget-content">
+                                <div class="timeline-container" id="threat-timeline-container">
+                                    <!-- Timeline items will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="widget mitre-heatmap">
+                            <div class="widget-header">
+                                <h3>MITRE ATT&CK Heatmap</h3>
+                                <div class="widget-controls">
+                                    <select class="form-select">
+                                        <option>Last 24h</option>
+                                        <option>Last 7d</option>
+                                        <option>Last 30d</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="widget-content">
+                                <div class="mitre-matrix" id="mitre-matrix">
+                                    <!-- MITRE ATT&CK matrix will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- IOC Extractor Tab -->
+                <div class="tab-content" id="ioc-extractor">
+                    <div class="extractor-container">
+                        <div class="input-section">
+                            <div class="section-header">
+                                <h2>Input Analysis</h2>
+                                <div class="section-controls">
+                                    <button class="btn btn-secondary" id="sample-data-btn">
+                                        <i class="fas fa-flask"></i>
+                                        Sample Data
+                                    </button>
+                                    <button class="btn btn-secondary" id="clear-input-btn">
+                                        <i class="fas fa-trash"></i>
+                                        Clear
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="input-container">
+                                <div class="input-tabs">
+                                    <button class="input-tab active" data-input-type="text">
+                                        <i class="fas fa-file-text"></i>
+                                        Text Input
+                                    </button>
+                                    <button class="input-tab" data-input-type="file">
+                                        <i class="fas fa-file-upload"></i>
+                                        File Upload
+                                    </button>
+                                    <button class="input-tab" data-input-type="url">
+                                        <i class="fas fa-link"></i>
+                                        URL Analysis
+                                    </button>
+                                </div>
+                                
+                                <div class="input-content">
+                                    <div class="input-panel active" id="text-input-panel">
+                                        <textarea 
+                                            id="input-text" 
+                                            class="input-textarea" 
+                                            placeholder="Paste raw text, logs, emails, or any content containing IOCs..."
+                                            spellcheck="false"
+                                        ></textarea>
+                                        <div class="input-stats">
+                                            <span class="stat-item">
+                                                <i class="fas fa-align-left"></i>
+                                                Lines: <span id="line-count">0</span>
+                                            </span>
+                                            <span class="stat-item">
+                                                <i class="fas fa-font"></i>
+                                                Characters: <span id="char-count">0</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="input-panel" id="file-input-panel">
+                                        <div class="file-drop-zone" id="file-drop-zone">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                            <p>Drop files here or click to browse</p>
+                                            <p class="file-types">Supports: TXT, LOG, CSV, JSON, XML, PDF</p>
+                                            <input type="file" id="file-input" multiple accept=".txt,.log,.csv,.json,.xml,.pdf">
+                                        </div>
+                                        <div class="uploaded-files" id="uploaded-files"></div>
+                                    </div>
+                                    
+                                    <div class="input-panel" id="url-input-panel">
+                                        <div class="url-analyzer">
+                                            <input type="url" id="url-input" class="form-input" placeholder="Enter URL to analyze...">
+                                            <button class="btn btn-primary" id="analyze-url-btn">
+                                                <i class="fas fa-search"></i>
+                                                Analyze URL
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="extraction-controls">
+                                <button class="btn btn-primary btn-large" id="extract-btn" disabled>
+                                    <i class="fas fa-play"></i>
+                                    Extract & Analyze
+                                </button>
+                                <div class="extraction-options">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="auto-enrich" checked>
+                                        Auto-enrich with threat intelligence
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="deep-analysis" checked>
+                                        Deep analysis (OSINT lookup)
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="mitre-mapping">
+                                        Map to MITRE ATT&CK
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="results-section">
+                            <div class="section-header">
+                                <h2>Analysis Results</h2>
+                                <div class="section-controls">
+                                    <div class="view-toggle">
+                                        <button class="view-btn active" data-view="cards">
+                                            <i class="fas fa-th-large"></i>
+                                        </button>
+                                        <button class="view-btn" data-view="table">
+                                            <i class="fas fa-table"></i>
+                                        </button>
+                                        <button class="view-btn" data-view="timeline">
+                                            <i class="fas fa-stream"></i>
+                                        </button>
+                                    </div>
+                                    <div class="export-controls">
+                                        <button class="btn btn-secondary" id="export-csv">
+                                            <i class="fas fa-file-csv"></i>
+                                            CSV
+                                        </button>
+                                        <button class="btn btn-secondary" id="export-json">
+                                            <i class="fas fa-file-code"></i>
+                                            JSON
+                                        </button>
+                                        <button class="btn btn-secondary" id="export-stix">
+                                            <i class="fas fa-share-alt"></i>
+                                            STIX
+                                        </button>
+                                        <button class="btn btn-accent" id="copy-all">
+                                            <i class="fas fa-copy"></i>
+                                            Copy All
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="results-summary" id="results-summary">
+                                <div class="summary-stats">
+                                    <div class="summary-stat">
+                                        <span class="stat-label">Total IOCs:</span>
+                                        <span class="stat-value" id="total-iocs">0</span>
+                                    </div>
+                                    <div class="summary-stat">
+                                        <span class="stat-label">High Risk:</span>
+                                        <span class="stat-value risk-high" id="high-risk-iocs">0</span>
+                                    </div>
+                                    <div class="summary-stat">
+                                        <span class="stat-label">Medium Risk:</span>
+                                        <span class="stat-value risk-medium" id="medium-risk-iocs">0</span>
+                                    </div>
+                                    <div class="summary-stat">
+                                        <span class="stat-label">Low Risk:</span>
+                                        <span class="stat-value risk-low" id="low-risk-iocs">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="results-container" id="results-container">
+                                <div class="no-results">
+                                    <div class="no-results-icon">
+                                        <i class="fas fa-search"></i>
+                                    </div>
+                                    <h3>No IOCs Extracted Yet</h3>
+                                    <p>Upload content or paste text to begin threat analysis</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Threat Intelligence Tab -->
+                <div class="tab-content" id="threat-intel">
+                    <div class="intel-workspace">
+                        <div class="intel-sources">
+                            <h3>Intelligence Sources</h3>
+                            <div class="source-grid" id="intel-sources-grid">
+                                <!-- Intelligence source cards will be populated here -->
+                            </div>
+                        </div>
+                        
+                        <div class="intel-feeds">
+                            <h3>Live Threat Feeds</h3>
+                            <div class="feed-container" id="threat-feeds">
+                                <!-- Live feeds will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MITRE ATT&CK Tab -->
+                <div class="tab-content" id="attack-mapping">
+                    <div class="attack-workspace">
+                        <div class="attack-matrix" id="attack-matrix-full">
+                            <!-- Full MITRE ATT&CK matrix -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detection Rules Tab -->
+                <div class="tab-content" id="detection-rules">
+                    <div class="rules-workspace">
+                        <div class="rules-editor" id="rules-editor">
+                            <!-- YARA and Sigma rule editor -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- OSINT Toolkit Tab -->
+                <div class="tab-content" id="osint-toolkit">
+                    <div class="osint-workspace">
+                        <div class="osint-tools" id="osint-tools">
+                            <!-- OSINT tools grid -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Threat Hunting Tab -->
+                <div class="tab-content" id="threat-hunting">
+                    <div class="hunting-workspace">
+                        <div class="hunting-dashboard" id="hunting-dashboard">
+                            <!-- Threat hunting interface -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics Tab -->
+                <div class="tab-content" id="analytics">
+                    <div class="analytics-workspace">
+                        <div class="analytics-charts" id="analytics-charts">
+                            <!-- Analytics and charts -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timeline Tab -->
+                <div class="tab-content" id="timeline">
+                    <div class="timeline-workspace">
+                        <div class="timeline-viewer" id="timeline-viewer">
+                            <!-- Timeline analysis -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Campaigns Tab -->
+                <div class="tab-content" id="campaigns">
+                    <div class="campaigns-workspace">
+                        <div class="campaigns-grid" id="campaigns-grid">
+                            <!-- Campaign tracking -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settings-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Settings</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-tabs">
+                    <button class="settings-tab active" data-settings-tab="api">API Keys</button>
+                    <button class="settings-tab" data-settings-tab="preferences">Preferences</button>
+                    <button class="settings-tab" data-settings-tab="about">About</button>
+                </div>
+                <div class="settings-content">
+                    <div class="settings-panel active" id="api-settings">
+                        <div class="setting-group">
+                            <label>VirusTotal API Key</label>
+                            <input type="password" id="virustotal-api" class="form-input" placeholder="Enter your VirusTotal API key">
+                        </div>
+                        <div class="setting-group">
+                            <label>Shodan API Key</label>
+                            <input type="password" id="shodan-api" class="form-input" placeholder="Enter your Shodan API key">
+                        </div>
+                        <div class="setting-group">
+                            <label>Censys API Key</label>
+                            <input type="password" id="censys-api" class="form-input" placeholder="Enter your Censys API key">
+                        </div>
+                    </div>
+                    <div class="settings-panel" id="preferences-settings">
+                        <div class="setting-group">
+                            <label>Theme</label>
+                            <select class="form-select" id="theme-select">
+                                <option value="dark">Dark</option>
+                                <option value="light">Light</option>
+                                <option value="auto">Auto</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="settings-panel" id="about-settings">
+                        <h3>CyberSOC Pro</h3>
+                        <p>Advanced Threat Intelligence Platform</p>
+                        <p>Version: 2.0.0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
